@@ -18,7 +18,7 @@
 
     // Promise 构造函数
     let Promise = function(fn) {
-        // fn 带有 resolve 和 reject 连个参数的函数对象，第一个参数用于处理执行成功的场景，第二个参数用在处理执行失败的场景，一旦操作完成即可调用这些函数
+        // fn 带有 resolve 和 reject 两个参数的函数对象，第一个参数用于处理执行成功的场景，第二个参数用在处理执行失败的场景，一旦操作完成即可调用这些函数
         const self = this
         self.state = PENDING // 初始化状态
         self.value = null // 存储异步结果的对象状态变量
