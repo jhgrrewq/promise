@@ -13,7 +13,7 @@
 
     // 全局定义
     const PENDING = 0
-    const FULLFILED = 1
+    const FULFILLED = 1
     const REJECTED = 2
 
     // Promise 构造函数
@@ -25,13 +25,13 @@
         self.fulfilledCallback = null // 存储成功回调函数
         self.rejectedCallback = null // 存储失败回调函数
 
-        // resolve 方法接受一个成功值，传递给绑定的 fullfiled 回调函数。主要工作是将当前状态变为 fulfilled 状态，同时调用绑定的 fulfilled 回调函数
+        // resolve 方法接受一个成功值，传递给绑定的 FULFILLED 回调函数。主要工作是将当前状态变为 fulfilled 状态，同时调用绑定的 fulfilled 回调函数
         function resolve(value) {
             // fulfilled 回调函数是通过 Promise.prototype.then 注册的
             const fulfilledCallback = self.fulfilledCallback
 
             if (self.state === PENDING) {
-                self.state = FULLFILED // 状态转换
+                self.state = FULFILLED // 状态转换
                 self.value = value // 保存成功值
 
                 if (isFunction(fulfilledCallback)) {
@@ -80,7 +80,7 @@
         // 如果 onFulfilled 不是函数，回调函数仅仅返回成功值
         const fulfilledCallback = isFunction(onFulfilled) ? onFulfilled : function returnFunc(value) { return value }
         // 如果 onFulfilled 不是函数，回调函数仅仅返回成功值
-        const rejectedCallback = isFunction(onRejected) ? ononRejected : function throwFunc(reason) { throw reason }
+        const rejectedCallback = isFunction(onRejected) ? onRejected : function throwFunc(reason) { throw reason }
 
         // 当前状态为 PENDING，注册回调函数到当前 Promise 对象中
         if (self.state === PENDING) {
@@ -111,7 +111,7 @@
         }
 
         // 当前状态为 fulfilled，立即执行回调函数
-        if (self.state === FULLFILED) {
+        if (self.state === FULFILLED) {
             // 返回一个新的 Promise 对象，可以被链式调用
             return new Promise(function(resolve, reject) {
                 // 在下一个事件轮询中立即调用 fulfilled 回调函数，根据执行情况决定新 Promise 对象的状态转变
