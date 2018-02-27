@@ -1,9 +1,3 @@
----
-title: Promise 实现
-tag: 
-	- Promise
----
-
 <!-- markdownlint-disable MD010 -->
 
 > 参考: [Promise - Javascript MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)、[Promise 原理分析](https://segmentfault.com/a/1190000006921539)
