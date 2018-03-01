@@ -73,7 +73,8 @@
     // then 方法返回一个 Promise，它有两个参数，分别为 Promise 在成功和失败情况下的回调函数
     // onFulfilled 回调函数，当 Promise 状态为 fulfilled 时候调用，该函数有一个参数，为成功的返回值
     // onRejected 回调函数，当 Promise 状态为 rejected 时候调用，该函数有一个参数，为失败的原因
-
+    // 将回调返回的结果作为新 Promise 的 resolve 的参数
+    
     Promise.prototype.then = function(onFulfilled, onRejected) {
         const self = this
         const value = self.value
