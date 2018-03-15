@@ -1,4 +1,3 @@
-<!-- markdownlint-disable MD010 -->
 
 > 参考: [Promise - Javascript MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)、[Promise 原理分析](https://segmentfault.com/a/1190000006921539)
 
@@ -30,6 +29,10 @@ pending 状态的 Promise 对象可能触发 fulfilled 状态并传递一个值�
 
 因为 Promise.prototype.then 和 Promise.prototype.catch 方法返回 Promise 对象，所以可以被链式调用
 
+> 可以认为 Promise 实现使用了 **发布订阅（观察者）** 设计模式：
+- 通过 Promise.prototype.then 和 Promise.prototype.catch 方法将观察者方法（成功和失败的回调）注册到被观察者 Promise 对象中，同时返回一个新的Promise对象，以便可以链式调用
+- 被观察者管理内部 pending、fulfilled 和 rejected 的状态转变，同时通过构造函数中传递的 **resolve 和 reject 方法以主动触发状态转变和通知观察者**
+
 ## Promise 构造函数
 
 ```js
@@ -55,7 +58,7 @@ executor 是带有 resolve 和 reject 两个参数的函数。 **Promise 构造�
 
 #### 实现
 
-构造函数只要完成状态的初始化，立即执行传入的 executor，并提供 resolve 和 reject 连个方法用于转变状态;
+构造函数只要完成状态的初始化，立即执行传入的 executor，并提供 resolve 和 reject 两个方法用于转变状态;
 resolve 函数将 promise 状态设置为 fulfilled，同时如果有成功回调函数就执行，reject 函数将 promise 状态设置为 rejected，同时如果有失败回调函数就执行
 
 ```js
@@ -149,7 +152,7 @@ p.then(function(value) {
 })
 ```
 
-then 方法返回一个 Promise，它有两个参数，分别为 Promise 在成功和失败情况下的为调函数。onFulfilled 回调函数在 Promise 状态为 fulfilled 时调用，该函数有一个参数，为成功的返回值；onRejected 回调函数在 Promise 状态为 rejected 时调用，该函数只有一个参数，为失败的原因
+then 方法返回一个 Promise，它有两个参数，分别为 Promise 在成功和失败情况下的回调函数。onFulfilled 回调函数在 Promise 状态为 fulfilled 时调用，该函数有一个参数，为成功的返回值；onRejected 回调函数在 Promise 状态为 rejected 时调用，该函数只有一个参数，为失败的原因
 
 #### 实现
 
@@ -160,7 +163,6 @@ then 方法根据当前状态，**当状态为 pending 时，注册回调函数�
 // onFulfilled 回调函数，当 Promise 状态为 fulfilled 时候调用，该函数有一个参数，为成功的返回值
 // onRejected 回调函数，当 Promise 状态为 rejected 时候调用，该函数有一个参数，为失败的原因
 // 将回调返回的结果作为新 Promise 的 resolve 的参数
-
 Promise.prototype.then = function(onFulfilled, onRejected) {
 	const self = this
 	const value = self.value
