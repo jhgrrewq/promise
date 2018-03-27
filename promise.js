@@ -35,10 +35,7 @@
                 self.value = value // 保存成功值
 
                 if (isFunction(fulfilledCallback)) {
-                    setTimeout(function() {
-                        // 不阻塞主流程，在下一个事件轮询中再调用 fulfilled 回调函数
-                        fulfilledCallback(value)
-                    })
+                    fulfilledCallback(value)
                 }
             }
         }
@@ -53,10 +50,7 @@
                 self.value = reason // 保存成功值
 
                 if (isFunction(rejectedCallback)) {
-                    setTimeout(function() {
-                        // 不阻塞主流程，在下一个事件轮询中再调用 rejected 回调函数
-                        rejectedCallback(reason)
-                    })
+                    rejectedCallback(reason)
                 }
             }
         }
@@ -89,24 +83,31 @@
             return new Promise(function(resolve, reject) {
                 // 将 fulfilled 回调函数注册到当前 Promise 对象中（非新 Promise 对象）
                 self.fulfilledCallback = function(value) {
-                    // 根据回调函数的执行情况，通过传递新的 Promise 对象的 resolve 和 reject 方法对其状态进行转变
-                    try {
-                        const newValue = fulfilledCallback(value)
-                        // 解析成功值
-                        resolveValue(newValue, resolve, reject)
-                    } catch(err) {
-                        reject(err)
-                    }
+                    // 注册的回调需要异步调用
+                    setTimeout(function() {
+                        // 根据回调函数的执行情况，通过传递新的 Promise 对象的 resolve 和 reject 方法对其状态进行转变
+                        try {
+                            const newValue = fulfilledCallback(value)
+                            // 解析成功值
+                            resolveValue(newValue, resolve, reject)
+                        } catch(err) {
+                            reject(err)
+                        }  
+                    })
+                    
                 }
 
                 // 同上
                 self.rejectedCallback = function(reason) {
-                    try{
-                        const newReason = rejectedCallback(reason)
-                        resolveValue(newReason, resolve, reject)
-                    } catch(err) {
-                        reject(err)
-                    }
+                    setTimout(function() {
+                        try{
+                            const newReason = rejectedCallback(reason)
+                            resolveValue(newReason, resolve, reject)
+                        } catch(err) {
+                            reject(err)
+                        }  
+                    })
+                    
                 }
             })
         }

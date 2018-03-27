@@ -31,10 +31,7 @@
             this.value = value // 保存成功值
 
             if (isFunction(fulfilledCallback)) {
-              setTimeout(() => {
-                // 不阻塞主流程，在下一个事件轮询中再调用 fulfilled 回调函数
-                fulfilledCallback(value)
-              })
+              fulfilledCallback(value)
             }
         }
       }
@@ -49,10 +46,7 @@
           this.value = reason // 保存成功值
 
           if (isFunction(rejectedCallback)) {
-            setTimeout(() => {
-              // 不阻塞主流程，在下一个事件轮询中再调用 rejected 回调函数
-              rejectedCallback(reason)
-            })
+            rejectedCallback(reason)
           }
         }
       }
@@ -85,24 +79,28 @@
         return new Promise((resolve, reject) => {
           // 将 fulfilled 回调函数注册到当前 Promise 对象中（非新 Promise 对象）
           this.fulfilledCallback = value => {
-            // 根据回调函数的执行情况，通过传递新的 Promise 对象的 resolve 和 reject 方法对其状态进行转变
-            try {
-              const newValue = fulfilledCallback(value)
-              // 解析成功值
-              resolveValue(newValue, resolve, reject)
-            } catch(err) {
-              reject(err)
-            }
+            setTimeout(() => {
+              // 根据回调函数的执行情况，通过传递新的 Promise 对象的 resolve 和 reject 方法对其状态进行转变
+              try {
+                const newValue = fulfilledCallback(value)
+                // 解析成功值
+                resolveValue(newValue, resolve, reject)
+              } catch(err) {
+                reject(err)
+              }
+            })
           }
 
           // 同上
           this.rejectedCallback = reason => {
-            try{
-              const newReason = rejectedCallback(reason)
-              resolveValue(newReason, resolve, reject)
-            } catch(err) {
-              reject(err)
-            }
+            setTimeout(() => {
+              try{
+                const newReason = rejectedCallback(reason)
+                resolveValue(newReason, resolve, reject)
+              } catch(err) {
+                reject(err)
+              }
+            })
           }
         })
       }
