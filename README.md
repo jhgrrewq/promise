@@ -1,5 +1,4 @@
 
-
 > 参考: [Promise - Javascript MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)、[Promise 原理分析](https://segmentfault.com/a/1190000006921539)
 
 多重的异步操作会造成回调地狱
@@ -413,6 +412,70 @@ Promise.all = function(values) {
 			doResolve(i, values[i])
 		}
 	})
+}
+```
+
+## Promise.deferred()
+
+```js
+function readImg() {
+	let defer = Promise.deferred()
+	let img = new Image()
+	img.onload = function() {
+		defer.resolve('ok')
+	}
+	img.onerror = function() {
+		defer.reject('error')
+	}
+	img.src = 'https://www.baidu.com/img/ps_index_left_icon_big.png?v=22310542.png'
+	return defer.promise()
+}
+
+readImg().then(function (data) {
+	console.log(data) // ok
+},function(err){
+	console.log(err) // error
+})
+```
+
+类似 jquery 的 deferred 用法，Promise.deferred() 方法不需要用 new 来生成 Promise, 上面的例子比较一下 jquery 的 deferred
+
+```js
+function readImg() {
+	let defer = $.Deferred()
+	let img = new Image()
+	img.onload = function() {
+		defer.resolve('ok')
+	}
+	img.onerror = function() {
+		defer.reject('error')
+	}
+	img.src = 'https://www.baidu.com/img/ps_index_left_icon_big.png?v=22310542.png'
+	return defer.promise()
+}
+
+readImg().then(function (data) {
+	console.log(data) // ok
+},function(err){
+	console.log(err) // error
+})
+```
+
+#### 实现
+
+```js
+// Promise.deferred() 方法不需要用 new 来生成 Promise
+Promise.deferred = function() {
+	let def = {}
+	// defer.promise() 返回一个 promise
+	def.promise = function() {
+		return new Promise(function(resolve, reject) {
+			def.resolve = resolve
+			def.reject = reject
+		})
+	}
+
+	return def
 }
 ```
 

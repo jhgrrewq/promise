@@ -236,6 +236,20 @@
                 }
             })
         }
+
+        // Promise.deferred() 方法不需要用 new 来生成 Promise 
+        static deferred() {
+            let def = {}
+            // defer.promise() 返回一个 promise
+            def.promise = function() {
+                return new Promise(function(resolve, reject) {
+                    def.resolve = resolve
+                    def.reject = reject
+                })
+            }
+        
+            return def
+        }
     }
 
     return Promise

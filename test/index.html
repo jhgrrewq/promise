@@ -8,8 +8,9 @@
 </head>
 <body>
     <div id="test-promise-log"></div>
-    <!-- <script src="../promise.js"></script> -->
-    <script src="../promise.es6.js"></script>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+    <script src="../promise.js"></script>
+    <!-- <script src="../promise.es6.js"></script> -->
     <script>
     // // Promise.all
     // var all1 = new Promise(function (resolve, reject) {
@@ -206,6 +207,28 @@
     // p3.catch(err => {
     //     console.log('state p3 err ' + err)
     // })
+
+    // Promise.defer()
+
+    function readImg() {
+        // let defer = $.Deferred();  
+        let defer = Promise.deferred();  
+        let img = new Image()
+        img.onload = function() {
+            defer.resolve('ok')
+        }
+        img.onerror = function() {
+            defer.reject('error')
+        }
+        img.src = 'https://www.baidu.com/img/ps_index_left_icon_big.png?v=22310542.png'
+        return defer.promise()
+    }
+
+    readImg().then(function (data) {
+        console.log(data)
+    },function(err){
+        console.log(err);
+    })
     </script>
 </body>
 </html>
