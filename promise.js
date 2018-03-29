@@ -25,7 +25,7 @@
         self.fulfilledCallbackList = [] // 存储成功回调函数数组
         self.rejectedCallbackList = [] // 存储失败回调函数数组
 
-        // resolve 方法主要工作是将当前状态变为 fulfilled 状态，同时遍历 fulfilled 回调函数数组，异步调用每个回调
+        // resolve 方法主要工作是将当前状态变为 fulfilled 状态，同时遍历 fulfilled 回调函数数组，调用每个回调
         function resolve(value) {
             // 当传入值为 promise，需要异步获取 promise 的状态和值
             if (value instanceof Promise) {
@@ -42,11 +42,11 @@
             }
         }
 
-        // reject 方法接受一个失败信息，传递给绑定的 rejected 回调函数数组。主要工作是将当前状态变为 rejected 状态，同时遍历绑定的 rejected 回调函数数组，异步调用每个回调
+        // reject 方法接受一个失败信息，传递给绑定的 rejected 回调函数数组。主要工作是将当前状态变为 rejected 状态，同时遍历绑定的 rejected 回调函数数组，调用每个回调
         function reject(reason) {
             if (self.state === PENDING) {
                 self.state = REJECTED // 状态转换
-                self.value = reason // 保存成功值
+                self.value = reason // 保存失败值
 
                 self.rejectedCallbackList.forEach(function(cb) {
                     cb(reason)
@@ -66,7 +66,7 @@
     // then 方法返回一个 Promise，它有两个参数，分别为 Promise 在成功和失败情况下的回调函数
     // onFulfilled 回调函数，当 Promise 状态为 fulfilled 时候调用，该函数有一个参数，为成功的返回值
     // onRejected 回调函数，当 Promise 状态为 rejected 时候调用，该函数有一个参数，为失败的原因
-    // 将回调返回的结果作为新 Promise 的 resolve 的参数
+    // 将回调执行返回的结果作为新 Promise 的 resolve 的参数
     
     Promise.prototype.then = function(onFulfilled, onRejected) {
         const self = this
@@ -87,7 +87,7 @@
                         // 根据回调函数的执行情况，通过传递新的 Promise 对象的 resolve 和 reject 方法对其状态进行转变
                         try {
                             const newValue = fulfilledCallback(value)
-                            // 解析成功值
+                            // 解析回调执行返回值
                             resolveValue(newValue, resolve, reject)
                         } catch(err) {
                             reject(err)
@@ -141,7 +141,7 @@
             })
         }
 
-        // 解析传递值函数
+        // 解析回调执行返回值函数
         function resolveValue(value, resolve, reject) {
             // 如果传递值为 Promise 对象，将新 Promise 对象的 resolve 和 reject 方法传递给 Promise 传递值以触发状态的转换
             if (value instanceof Promise) {
@@ -172,7 +172,7 @@
 
     // Promise.resolve(value) 方法返回一个以给定值解析的 Promise 对象。如果这个值是一个 Promise 对象，返回的 Promise 会采用它的最终状态，否则会以该值为成功状态返回 Promise 对象
     Promise.resolve = function(value) {
-        // 如果为 Promise 对象，直接返回当前值
+        // 如果为 Promise 对象，直接返回 该 Promise
         if (value instanceof Promise) {
             return value
         }

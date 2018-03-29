@@ -8,64 +8,204 @@
 </head>
 <body>
     <div id="test-promise-log"></div>
-    <script src="../promise.js"></script>
-    <!-- <script src="../promise.es6.js"></script> -->
+    <!-- <script src="../promise.js"></script> -->
+    <script src="../promise.es6.js"></script>
     <script>
-    'use strict';
+    // // Promise.all
+    // var all1 = new Promise(function (resolve, reject) {
+    //     setTimeout(resolve, 500, 'all1');
+    // });
+    // var all2 = new Promise(function (resolve, reject) {
+    //     setTimeout(resolve, 500, 'all2');
+    // });
+    // // 同时执行all1和all2，并在它们都完成后执行then:
+    // Promise.all([all1, all2]).then(function (results) {
+    //     console.log(results, 'all'); // 获得一个Array: ['all1', 'all2']
+    // });
 
-    // 清除log:
-    var logging = document.getElementById('test-promise-log');
-    while (logging.children.length > 1) {
-        logging.removeChild(logging.children[logging.children.length - 1]);
-    }
+    // // Promise.race()
+    // var race1 = new Promise(function (resolve, reject) {
+    //     setTimeout(resolve, 500, 'race1');
+    // });
+    // var race2 = new Promise(function (resolve, reject) {
+    //     setTimeout(resolve, 600, 'race2');
+    // });
+    // Promise.race([race1, race2]).then(function (result) {
+    //     console.log(result, 'race'); // 'race1'
+    // });
 
-    // 输出log到页面:
-    function log(s) {
-        var p = document.createElement('p');
-        p.innerHTML = s;
-        logging.appendChild(p);
-    }
-    new Promise(function (resolve, reject) {
-        log('start new Promise...');
-        var timeOut = Math.random() * 2;
-        log('set timeout to: ' + timeOut + ' seconds.');
-        setTimeout(function () {
-            if (timeOut < 1) {
-                log('call resolve()...');
-                resolve('200 OK');
-            }
-            else {
-                log('call reject()...');
-                reject('timeout in ' + timeOut + ' seconds.');
-            }
-        }, timeOut * 1000);
-    }).then(function (r) {
-        log('Done: ' + r);
-    }).catch(function (reason) {
-        log('Failed: ' + reason);
-    });
+    // // resolve()
+    // var resolve1 = new Promise((resolve, reject) => {
+    //     resolve(Promise.resolve('resolve'));
+    // })
 
-    var p1 = new Promise(function (resolve, reject) {
-        setTimeout(resolve, 500, 'P1');
-    });
-    var p2 = new Promise(function (resolve, reject) {
-        setTimeout(resolve, 500, 'P2');
-    });
-    // 同时执行p1和p2，并在它们都完成后执行then:
-    Promise.all([p1, p2]).then(function (results) {
-        console.log(results); // 获得一个Array: ['P1', 'P2']
-    });
+    // var resolve2 = new Promise((resolve, reject) => {
+    //     resolve(Promise.reject('reject'));
+    // })
 
-    var p1 = new Promise(function (resolve, reject) {
-        setTimeout(resolve, 500, 'P1');
-    });
-    var p2 = new Promise(function (resolve, reject) {
-        setTimeout(resolve, 600, 'P2');
-    });
-    Promise.race([p1, p2]).then(function (result) {
-        console.log(result); // 'P1'
-    });
+    // var resolve3 = new Promise((resolve, reject) => {
+    //     reject(Promise.resolve('resolve'));
+    // })
 
+    // resolve1.then(value => {
+    //     console.log('resolve1 fulfilled: ' + value);
+    // }, err => {
+    //     console.log('resolve1 rejected: ' + err);
+    // })
+
+    // resolve2.then(value => {
+    //     console.log('resolve2 fulfilled: ' + value);
+    // }, err => {
+    //     console.log('resolve2 rejected: ' + err);
+    // })
+
+    // resolve3.then(value => {
+    //     console.log('resolve3 fulfilled: ' + value);
+    // }, err => {
+    //     console.log('resolve3 rejected: ' + err);
+    // })
+
+    // // resolve3 rejected: [object Promise]
+    // // resolve1 fulfilled: resolve
+    // // resolve2 rejected: reject
+
+    // // Promise.resolve()
+    // var p1 = Promise.resolve(1)
+    // var p2 = Promise.resolve(p1)
+    // var p3 = new Promise((resolve, reject) => {
+    //     resolve(1)
+    // })
+    // var p4 = new Promise((resolve, reject) => {
+    //     resolve(p1)
+    // })
+
+    // console.log(p1 === p2)
+    // console.log(p1 === p3)
+    // console.log(p1 === p4)
+    // console.log(p3 === p4)
+
+    // // error 捕获
+    // var e1 = new Promise((resolve, reject) => {
+    //     bar()
+    //     resolve(1)
+    // }).then(value => {
+    //     console.log('e1 then value : ' + value)
+    // }, err => {
+    //     console.log('e1 then err : ' + err)
+    // }).then(value => {
+    //     console.log('e1 then value : ' + value)
+    // }, err => {
+    //     console.log('e1 then err : ' + err)
+    // })
+
+    // var e2 = new Promise((resolve, reject) => {
+    //     resolve(1)
+    // }).then(value => {
+    //     console.log('e2 then value : ' + value)
+    //     bar()
+    // }, err => {
+    //     console.log('e2 then err : ' + err)
+    // }).then(value => {
+    //     console.log('e2 then value : ' + value)
+    // }, err => {
+    //     console.log('e2 then err : ' + err)
+    // return 1
+    // }).then(value => {
+    //     console.log('e2 then value : ' + value)
+    // }, err => {
+    //     console.log('e2 then err : ' + err)
+    // })
+
+    // // e1 then err : ReferenceError: bar is not defined
+    // // e2 then value : 1
+    // // e1 then value : undefined
+    // // e2 then err : ReferenceError: bar is not defined
+    // // e2 then value : 1
+
+    // // then 回调异步调用
+    // new Promise((resolve, reject) => {
+    //     resolve('ok')
+    // }).then(value => {
+    //     console.log(value)
+    // })
+    // console.log('first')
+
+    // // 链式调用
+    // new Promise((resolve, reject) => {
+    //     resolve(1)
+    // }).then(value => {
+    //     console.log('then 1: ' + value) // 1
+    // return value * 2 // return 2, 返回一个 resolved 状态，值为 2 的 Promise
+    // }).then(value => {
+    //     console.log("then 2: " + value) // 2
+    // // 默认返回 undefined, 返回一个 resolved 状态，值为 undefined 的 Promise
+    // }).then(value => {
+    //     console.log("then 3: " + value) // undefined
+    //     return Promise.resolve('resolve') // 返回一个 resolved 状态，值为 'resolve' 的 Promise
+    // }).then(value => {
+    //     console.log("then 4: " + value) // 'resovle'
+    //     return Promise.reject('reject') // 返回一个 rejected 状态，值为 'reject' 的 Promise
+    // }).then(value => {
+    //     console.log('then 5 resolve:' + value)
+    // }, err => {
+    //     console.log('then 5 reject:' + err)
+    // })
+    
+    // 状态不可逆
+    // new Promise((resolve, reject) => {
+    //     resolve('resolve11 ok 1')
+    //     resolve('resolve12 p1 ok 2')
+    // }).then(value => {
+    //     console.log(value)
+    // })
+
+    // new Promise((resolve, reject) => {
+    //     resolve('resolve21 p2 ok 1')
+    //     reject('resolve22 p2 err')
+    // }).then(value => {
+    //     console.log(value)
+    // })
+
+    // // Promise 三种状态
+    // var p1 = new Promise((resolve, reject) => {
+    //     resolve(1)
+    // })
+
+    // var p2 = new Promise((resolve, reject) => {
+    //     setTimeout(() => {
+    //         resolve(2)
+    //     }, 500)
+    // })
+
+    // var p3 = new Promise((resolve, reject) => {
+    //     setTimeout(() => {
+    //         reject(3)
+    //     }, 500)
+    // })
+
+    // console.log(p1, 'state p1')
+    // console.log(p2, 'state p2')
+    // console.log(p3, 'state p3')
+
+    // setTimeout(() => {
+    //     console.log(p2, 'state later p2')
+    // },1000)
+
+    // setTimeout(() => {
+    //     console.log(p3, 'state later p3')
+    // },1000)
+
+    // p1.then(value => {
+    //     console.log('state p1 value ' + value)
+    // })
+
+    // p2.then(value => {
+    //     console.log('state p2 value ' + value)
+    // })
+
+    // p3.catch(err => {
+    //     console.log('state p3 err ' + err)
+    // })
     </script>
 </body>
 </html>
