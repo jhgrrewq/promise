@@ -12,46 +12,45 @@
     }
 
     // 全局定义
-    const PENDING = 0
-    const FULFILLED = 1
-    const REJECTED = 2
+    const PENDING = "PENDING"
+    const FULFILLED = "FULFILLED"
+    const REJECTED = "REJECTED"
 
     // Promise 构造函数
-    let Promise = function(fn) {
+    function Promise(fn) {
         // fn 带有 resolve 和 reject 两个参数的函数对象，第一个参数用于处理执行成功的场景，第二个参数用在处理执行失败的场景，一旦操作完成即可调用这些函数
         const self = this
         self.state = PENDING // 初始化状态
         self.value = null // 存储异步结果的对象状态变量
-        self.fulfilledCallback = null // 存储成功回调函数
-        self.rejectedCallback = null // 存储失败回调函数
+        self.fulfilledCallbackList = [] // 存储成功回调函数数组
+        self.rejectedCallbackList = [] // 存储失败回调函数数组
 
-        // resolve 方法接受一个成功值，传递给绑定的 FULFILLED 回调函数。主要工作是将当前状态变为 fulfilled 状态，同时调用绑定的 fulfilled 回调函数
+        // resolve 方法主要工作是将当前状态变为 fulfilled 状态，同时遍历 fulfilled 回调函数数组，异步调用每个回调
         function resolve(value) {
-            // fulfilled 回调函数是通过 Promise.prototype.then 注册的
-            const fulfilledCallback = self.fulfilledCallback
+            // 当传入值为 promise，需要异步获取 promise 的状态和值
+            if (value instanceof Promise) {
+                return value.then(resolve, reject)
+            }
 
             if (self.state === PENDING) {
                 self.state = FULFILLED // 状态转换
                 self.value = value // 保存成功值
 
-                if (isFunction(fulfilledCallback)) {
-                    fulfilledCallback(value)
-                }
+                self.fulfilledCallbackList.forEach(function(cb) {
+                    cb(value)
+                })
             }
         }
 
-        // reject 方法接受一个失败信息，传递给绑定的 rejected 回调函数。主要工作是将当前状态变为 rejected 状态，同时调用绑定的 rejected 回调函数
+        // reject 方法接受一个失败信息，传递给绑定的 rejected 回调函数数组。主要工作是将当前状态变为 rejected 状态，同时遍历绑定的 rejected 回调函数数组，异步调用每个回调
         function reject(reason) {
-            // rejected 回调函数是通过 Promise.prototype.catch 注册的
-            const rejectedCallback = self.rejectedCallback
-
             if (self.state === PENDING) {
                 self.state = REJECTED // 状态转换
                 self.value = reason // 保存成功值
 
-                if (isFunction(rejectedCallback)) {
-                    rejectedCallback(reason)
-                }
+                self.rejectedCallbackList.forEach(function(cb) {
+                    cb(reason)
+                })
             }
         }
 
@@ -71,7 +70,7 @@
     
     Promise.prototype.then = function(onFulfilled, onRejected) {
         const self = this
-        const value = self.value
+        let newPromise
         // 如果 onFulfilled 不是函数，回调函数仅仅返回成功值
         const fulfilledCallback = isFunction(onFulfilled) ? onFulfilled : function returnFunc(value) { return value }
         // 如果 onFulfilled 不是函数，回调函数仅仅返回成功值
@@ -80,9 +79,9 @@
         // 当前状态为 PENDING，注册回调函数到当前 Promise 对象中
         if (self.state === PENDING) {
             // 返回一个新的 Promise 对象，可以被链式调用
-            return new Promise(function(resolve, reject) {
+            newPromise = new Promise(function(resolve, reject) {
                 // 将 fulfilled 回调函数注册到当前 Promise 对象中（非新 Promise 对象）
-                self.fulfilledCallback = function(value) {
+                self.fulfilledCallbackList.push(function(value) {
                     // 注册的回调需要异步调用
                     setTimeout(function() {
                         // 根据回调函数的执行情况，通过传递新的 Promise 对象的 resolve 和 reject 方法对其状态进行转变
@@ -94,12 +93,11 @@
                             reject(err)
                         }  
                     })
-                    
-                }
+                })
 
                 // 同上
-                self.rejectedCallback = function(reason) {
-                    setTimout(function() {
+                self.rejectedCallbackList.push(function(reason) {
+                    setTimeout(function() {
                         try{
                             const newReason = rejectedCallback(reason)
                             resolveValue(newReason, resolve, reject)
@@ -107,19 +105,18 @@
                             reject(err)
                         }  
                     })
-                    
-                }
+                })
             })
         }
 
         // 当前状态为 fulfilled，立即执行回调函数
         if (self.state === FULFILLED) {
             // 返回一个新的 Promise 对象，可以被链式调用
-            return new Promise(function(resolve, reject) {
+            newPromise = new Promise(function(resolve, reject) {
                 // 在下一个事件轮询中立即调用 fulfilled 回调函数，根据执行情况决定新 Promise 对象的状态转变
                 setTimeout(function() {
                     try {
-                        const newValue = fulfilledCallback(value)
+                        const newValue = fulfilledCallback(self.value)
                         resolveValue(newValue, resolve, reject)
                     } catch(err) {
                         reject(err)
@@ -131,11 +128,11 @@
         // 当前状态为 rejected，立即执行回调函数
         if (self.state === REJECTED) {
             // 返回一个新的 Promise 对象，可以被链式调用
-            return new Promise(function(resolve, reject) {
+            newPromise = new Promise(function(resolve, reject) {
                 // 在下一个事件轮询中立即调用 rejected 回调函数，根据执行情况决定新 Promise 对象的状态转变
                 setTimeout(function() {
                     try{
-                        const newReason = rejectedCallback(reason)
+                        const newReason = rejectedCallback(self.value)
                         resolveValue(newReason, resolve, reject)
                     } catch(err) {
                         reject(err)
@@ -148,13 +145,14 @@
         function resolveValue(value, resolve, reject) {
             // 如果传递值为 Promise 对象，将新 Promise 对象的 resolve 和 reject 方法传递给 Promise 传递值以触发状态的转换
             if (value instanceof Promise) {
-                value.then(resolve, reject)
-                return
+                return value.then(resolve, reject)
             }
 
             // 如果传递值不是 Promise 对象，传递给 resolve 方法
             resolve(value)
         }
+
+        return newPromise
     }
 
     // catch 方法
